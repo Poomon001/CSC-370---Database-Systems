@@ -1,19 +1,38 @@
 from erd import *
 from table import *
 
-def formatForeignKey(value):
+def getOtherRelation(currRelationshipName, relationshipSet):
+    getRelation = relationshipSet[currRelationshipName][0]
+    return getRelation
+
+# get a foreign key format for relationship
+def formatRelationshipForeignKey(value):
     formatForeignKey = []
+    relationName = value[0]
 
-    # [[connectionTables], [references]]
-    foreignKeys = value[4]
+    # [[connectionTables, references]]
+    names_and_pks = value[4]
 
-    for i in range(len(foreignKeys)-1,-1,-1):
-        table = foreignKeys[i][0]
-        reference = foreignKeys[i][1]
-        formatForeignKey.append(((reference,), table, (reference,)))
+    # get foreign keys
+    for i in range(len(names_and_pks)-1,-1,-1):
+        tableName = names_and_pks[i][0]
+        reference = names_and_pks[i][1]
+        if relationName != tableName:
+            formatForeignKey.append((tuple(reference), tableName, tuple(reference)))
     return formatForeignKey
 
+# get a foreign key format for entry
+def formatEntryForeignKey(currTable, currRelationshipName, relationshipSet):
+    formatForeignKey = []
+    names_and_pks = relationshipSet[currRelationshipName][4]
 
+    for name_and_pk in names_and_pks:
+        if name_and_pk[0] != currTable:
+            reference = name_and_pk[1]
+            formatForeignKey.append((tuple(reference), name_and_pk[0], tuple(reference)))
+    return formatForeignKey
+
+# convert to database answer
 def convert_to_db(tableSet, relationshipSet):
     # [table: Table]
     db = []
@@ -24,14 +43,19 @@ def convert_to_db(tableSet, relationshipSet):
         attributes = value[0]
         primary_key = value[1]
         connections = value[2]
+        parents = value[3]
+        supporting_relations = value[4]
+        print(name, "=====")
+        if connections:
+            otherRelationship = getOtherRelation(connections[0], relationshipSet)
 
-        # print(key, attributes, primary_key)
+            # many-one without pk
+            if connections[1] == "MANY" and otherRelationship == "ONE" and len(relationshipSet[connections[0]][5]) == 0:
+                db.append(Table(name, set(attributes)|set(relationshipSet[connections[0]][2]), set(primary_key), set(formatEntryForeignKey(name, connections[0], relationshipSet))))
+                continue
 
-        if not connections:
-            db.append(Table(name, set(attributes), set(primary_key), set()))
-        else:
-            if connections[1] == "MANY":
-                db.append(Table(name, set(attributes), set(primary_key), set()))
+        # default
+        db.append(Table(name, set(attributes), set(primary_key), set()))
 
     # build a table form relationshipSet
     for key, value in relationshipSet.items():
@@ -40,9 +64,24 @@ def convert_to_db(tableSet, relationshipSet):
         connectionTables = value[1]
         attributes = value[2]
         primary_key = value[3]
-        foreign_key = value[4]
+        names_and_pks = value[4]
+        original_primary_key = value[5]
 
-        db.append(Table(name, set(attributes), set(primary_key), set(formatForeignKey(value))))
+        # many-many case
+        if type == "MANY":
+            db.append(Table(name, set(attributes), set(primary_key), set(formatRelationshipForeignKey(value))))
+
+        # many-one with pk
+        if type == "ONE" and len(original_primary_key) != 0:
+            manyPK = []
+            # get manyPK
+            for name_and_pk in names_and_pks:
+                n = name_and_pk[0]
+                if n in tableSet and tableSet[n][2][1] == "MANY":
+                    manyPK.extend(tableSet[n][1])
+            manyPK.extend(original_primary_key)
+            db.append(Table(name, set(attributes), set(manyPK), set(formatRelationshipForeignKey(value))))
+
     return Database(db)
 
 
@@ -58,10 +97,10 @@ def convert_to_table( erd ):
     relationshipList = erd.relationships
     entrySetList = erd.entity_sets
 
-    # {tableName: str, [[attribute set], [primary key]]}
+    # {tableName: str, [[attribute set], [primary key], [connection], [parent], [supporting_relation]]}
     tableSet = {}
 
-    # {relationshipName: str, [type:str, [connection tables], [attribute set], [primary key], [foreign key]]}
+    # {relationshipName: str, [type:str, [connection tables], [attribute set], [all primary keys], [foreign key], [original primary keys]]}
     relationshipSet = {}
 
     # extract entrySet properties
@@ -72,6 +111,8 @@ def convert_to_table( erd ):
 
         #[[name: str, type: int]]
         connections = entry.connections
+        parent_list = entry.parents
+        supporting_relations_list = entry.supporting_relations
 
         # create a new set
         if name not in tableSet:
@@ -98,35 +139,51 @@ def convert_to_table( erd ):
 
                 # make relationship set
                 if relation_name not in relationshipSet:
-                    relationshipSet[relation_name] = [type, [], [], [], []]
+                    relationshipSet[relation_name] = [type, [], [], [], [], []]
                 # add more data to relationship set
-                relationshipSet[relation_name][0] = type
+                # always keep ONE if possible
+                relationshipSet[relation_name][0] = type if relationshipSet[relation_name][0] == "MANY" else relationshipSet[relation_name][0]
                 relationshipSet[relation_name][1].append(name)
                 [relationshipSet[relation_name][2].append(pk) for pk in primary_key_list]
                 [relationshipSet[relation_name][3].append(pk) for pk in primary_key_list]
-                [relationshipSet[relation_name][4].append([name, pk]) for pk in primary_key_list]
-
+                [relationshipSet[relation_name][4].append([name, primary_key_list])]
         else:
             tableSet[name].append([])
 
-        # extract relationships
-        for relationship in relationshipList:
-            name = relationship.name
-            attribute = relationship.attributes
-            primary_keys = relationship.primary_key
+        if parent_list:
+            tableSet[name].append(parent_list)
+        else:
+            tableSet[name].append([])
 
-            # create a new set
-            if attribute:
-                [relationshipSet[name][2].append(attr) for attr in attribute]
+        if supporting_relations_list:
+            tableSet[name].append(supporting_relations_list)
+        else:
+            tableSet[name].append([])
 
-            if primary_keys:
-                [relationshipSet[name][3].append(pk) for pk in primary_keys]
+    # extract relationships
+    for relationship in relationshipList:
+        name = relationship.name
+        attribute = relationship.attributes
+        primary_keys = relationship.primary_key
+
+        # create a new set
+        if attribute:
+            [relationshipSet[name][2].append(attr) for attr in attribute]
+
+        if primary_keys:
+            [relationshipSet[name][3].append(pk) for pk in primary_keys]
+            [relationshipSet[name][5].append(pk) for pk in primary_keys]
+
+    print("\n===== table Set =====\n")
+    print(tableSet)
+    print("\n==================\n")
+
+    print("\n===== relationship Set =====\n")
+    print(relationshipSet)
+    print("\n==================\n")
 
     # make db
     db = convert_to_db(tableSet, relationshipSet)
 
-    print("\n")
-    print("expect", "\n".join([str(val) for val in expectedDB.tables]))
-    print("\n========================\n")
     print("mine", "\n".join([str(val) for val in db.tables]))
     return db
