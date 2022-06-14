@@ -25,7 +25,6 @@ def formatRelationshipForeignKey(value):
 def formatEntryForeignKey(currTable, currRelationshipName, relationshipSet):
     formatForeignKey = []
     names_and_pks = relationshipSet[currRelationshipName][4]
-
     for name_and_pk in names_and_pks:
         if name_and_pk[0] != currTable:
             reference = name_and_pk[1]
@@ -45,17 +44,21 @@ def convert_to_db(tableSet, relationshipSet):
         connections = value[2]
         parents = value[3]
         supporting_relations = value[4]
-        print(name, "=====")
+
+        # [attribute, primary_key, foreign keys]
+        tempProperties = [set(attributes),set(primary_key),set()]
+
         if connections:
-            otherRelationship = getOtherRelation(connections[0], relationshipSet)
+            for connection in connections:
+                otherRelationship = getOtherRelation(connection[0], relationshipSet)
 
-            # many-one without pk
-            if connections[1] == "MANY" and otherRelationship == "ONE" and len(relationshipSet[connections[0]][5]) == 0:
-                db.append(Table(name, set(attributes)|set(relationshipSet[connections[0]][2]), set(primary_key), set(formatEntryForeignKey(name, connections[0], relationshipSet))))
-                continue
+                # many-one without pk
+                if connection[1] == "MANY" and otherRelationship == "ONE" and len(relationshipSet[connection[0]][5]) == 0:
+                    tempProperties[0] = tempProperties[0]|set(relationshipSet[connection[0]][2])
+                    tempProperties[2] = tempProperties[2]|set(formatEntryForeignKey(name, connection[0], relationshipSet))
+                    continue
 
-        # default
-        db.append(Table(name, set(attributes), set(primary_key), set()))
+        db.append(Table(name, tempProperties[0], tempProperties[1], tempProperties[2]))
 
     # build a table form relationshipSet
     for key, value in relationshipSet.items():
@@ -77,7 +80,7 @@ def convert_to_db(tableSet, relationshipSet):
             # get manyPK
             for name_and_pk in names_and_pks:
                 n = name_and_pk[0]
-                if n in tableSet and tableSet[n][2][1] == "MANY":
+                if n in tableSet and (name, 'MANY') in tableSet[n][2]:
                     manyPK.extend(tableSet[n][1])
             manyPK.extend(original_primary_key)
             db.append(Table(name, set(attributes), set(manyPK), set(formatRelationshipForeignKey(value))))
@@ -116,26 +119,22 @@ def convert_to_table( erd ):
 
         # create a new set
         if name not in tableSet:
-            tableSet[name] = []
+            tableSet[name] = [[],[],[],[],[]]
 
         # get attributes
         if attribute_list:
-            tableSet[name].append(attribute_list)
-        else:
-            tableSet[name].append([])
+            tableSet[name][0].extend(attribute_list)
 
         # get primary key
         if primary_key_list:
-            tableSet[name].append(primary_key_list)
-        else:
-            tableSet[name].append([])
+            tableSet[name][1].extend(primary_key_list)
 
         # get connections
         if connections:
             for connection in connections:
                 relation_name = connection[0]
                 type = connection[1].name
-                tableSet[name].append([relation_name, type])
+                tableSet[name][2].append((relation_name, type))
 
                 # make relationship set
                 if relation_name not in relationshipSet:
@@ -147,18 +146,12 @@ def convert_to_table( erd ):
                 [relationshipSet[relation_name][2].append(pk) for pk in primary_key_list]
                 [relationshipSet[relation_name][3].append(pk) for pk in primary_key_list]
                 [relationshipSet[relation_name][4].append([name, primary_key_list])]
-        else:
-            tableSet[name].append([])
 
         if parent_list:
-            tableSet[name].append(parent_list)
-        else:
-            tableSet[name].append([])
+            tableSet[name][3].extend(parent_list)
 
         if supporting_relations_list:
-            tableSet[name].append(supporting_relations_list)
-        else:
-            tableSet[name].append([])
+            tableSet[name][4].extend(supporting_relations_list)
 
     # extract relationships
     for relationship in relationshipList:
