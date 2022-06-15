@@ -80,6 +80,16 @@ def convert_to_db(tableSet, relationshipSet):
                 tableSet[name][1] = tempProperties[1] | set(supporting_relation[3])
                 tableSet[name][2] = tempProperties[2] | set(formatEntryForeignKey(name, supporting_relation_name, relationshipSet))
 
+                # update connection
+                if connections:
+                    for connection in connections:
+                        connectionName = connection[0]
+                        relationshipSet[connectionName][2] = set(relationshipSet[connectionName][2]) | set(supporting_relation[2])
+                        relationshipSet[connectionName][3] = set(relationshipSet[connectionName][3]) | set(supporting_relation[3])
+                        for relationship in relationshipSet[connectionName][4]:
+                            relationship[1].extend(supporting_relation[4][0][1])
+                            relationship[1] = list(set(relationship[1]))
+
         db.append(Table(name, tempProperties[0], tempProperties[1], tempProperties[2]))
 
     # build a table form relationshipSet
