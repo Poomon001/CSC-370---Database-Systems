@@ -56,7 +56,29 @@ def convert_to_db(tableSet, relationshipSet):
                 if connection[1] == "MANY" and otherRelationship == "ONE" and len(relationshipSet[connection[0]][5]) == 0:
                     tempProperties[0] = tempProperties[0]|set(relationshipSet[connection[0]][2])
                     tempProperties[2] = tempProperties[2]|set(formatEntryForeignKey(name, connection[0], relationshipSet))
-                    continue
+
+        if parents:
+            # class inheritance
+            for parent in parents:
+                parent_primary_key = tableSet[parent][1]
+                tempProperties[0] = tempProperties[0] | set(parent_primary_key)
+                tempProperties[1] = tempProperties[1] | set(parent_primary_key)
+                tempProperties[2] = tempProperties[2] | set([(tuple(parent_primary_key), parent, tuple(parent_primary_key))])
+
+                tableSet[name][0] = tempProperties[0] | set(parent_primary_key)
+                tableSet[name][1] = tempProperties[1] | set(parent_primary_key)
+                tableSet[name][2] = tempProperties[2] | set([(tuple(parent_primary_key), parent, tuple(parent_primary_key))])
+
+        if supporting_relations:
+            for supporting_relation_name in supporting_relations:
+                supporting_relation = relationshipSet[supporting_relation_name]
+                tempProperties[0] = tempProperties[0] | set(supporting_relation[3])
+                tempProperties[1] = tempProperties[1] | set(supporting_relation[3])
+                tempProperties[2] = tempProperties[2] | set(formatEntryForeignKey(name, supporting_relation_name, relationshipSet))
+
+                tableSet[name][0] = tempProperties[0] | set(supporting_relation[3])
+                tableSet[name][1] = tempProperties[1] | set(supporting_relation[3])
+                tableSet[name][2] = tempProperties[2] | set(formatEntryForeignKey(name, supporting_relation_name, relationshipSet))
 
         db.append(Table(name, tempProperties[0], tempProperties[1], tempProperties[2]))
 
