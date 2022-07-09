@@ -14,4 +14,4 @@ FROM countyindustries
 		ON (industry.name='Educational services' AND industry.id=countyindustries.industry) 
 GROUP BY abbr, industry 
 ORDER BY TotalEmployees 
-LIMIT 25,1;
+LIMIT 1 OFFSET 25;
