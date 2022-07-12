@@ -13,14 +13,14 @@ FROM county
 	JOIN state
 		ON state.id=county.state AND state.abbr <> 'DC'
 	JOIN (
-		SELECT sum(p.population) AS total_population, c.fips AS county_fips, p.year AS population_year, s.id AS state_id
+		SELECT sum(p.population) AS total_population, s.id AS state_id
         FROM countypopulation AS p
 			JOIN county AS c
 				ON c.fips=p.county
 			JOIN state AS s
 				ON s.id=c.state
 		WHERE p.year=2019
-		GROUP BY abbr
+		GROUP BY id
     ) AS x
 		ON state.id=state_id
 	JOIN countylabourstats
@@ -29,6 +29,6 @@ FROM county
 		ON countyindustries.county=fips
 	JOIN industry
 		ON countyindustries.industry=industry.id
-GROUP BY industry.name, state, countylabourstats.year
+GROUP BY industry.name, state, countylabourstats.year, x.total_population
 HAVING `% of Population` >= 7.5
 ORDER BY sum(payroll) DESC;
