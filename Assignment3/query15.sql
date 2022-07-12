@@ -10,7 +10,7 @@ SELECT count(*)/(count(*)+max(K)) AS Fraction
 FROM genderbreakdown AS A
 	JOIN genderbreakdown AS B
 		ON A.county=B.county AND A.gender<>B.gender AND B.gender='male' AND A.population > B.population
-	 JOIN (	SELECT count(*) AS K
+	JOIN (	SELECT count(*) AS K
 			FROM genderbreakdown AS C
 				JOIN genderbreakdown AS D
 					ON C.county=D.county AND C.gender<>D.gender AND D.gender='male' AND C.population <= D.population) AS X;
