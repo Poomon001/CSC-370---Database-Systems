@@ -9,9 +9,8 @@
 
 SELECT name, abbr, labour_force, ((unemployed/labour_force)*100) AS 'Unemployment Rate'
 FROM county
-	JOIN countylabourstats
-		ON fips=county AND year='2008'
 	JOIN state
 		ON state.id=county.state
-WHERE (unemployed/labour_force)*100 > 10
+	JOIN countylabourstats
+		ON fips=county AND year='2008' AND (unemployed/labour_force)*100 > 10
 ORDER BY labour_force DESC;
