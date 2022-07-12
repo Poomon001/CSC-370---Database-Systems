@@ -12,6 +12,6 @@ FROM countyindustries
 		ON (state = id) 
 	JOIN industry 
 		ON (industry.name='Educational services' AND industry.id=countyindustries.industry) 
-GROUP BY abbr, industry 
+GROUP BY abbr
 ORDER BY TotalEmployees 
 LIMIT 1 OFFSET 25;
