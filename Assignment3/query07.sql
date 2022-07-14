@@ -5,8 +5,7 @@
 -- 0.9 marks: <16 operators
 -- 0.8 marks: correct answer
 
-
-SELECT name, A.population AS '2010', B.population AS '2019', abbr, ROUND(100-((B.population/A.population)*100), 4) AS 'Loss (%)' 
+SELECT name, A.population AS '2010', B.population AS '2019', abbr, 100-((B.population/A.population)*100) AS 'Loss (%)' 
 FROM county
 	JOIN state
 		ON state.id=county.state
