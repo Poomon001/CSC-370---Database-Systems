@@ -16,11 +16,14 @@ class ImplementMe:
     @staticmethod
     def InsertIntoIndex( index, key ):
         keySets = index.root.keys
-        pointerSets = index.root.pointers.pointers
-        print(index)
+        pointerSets = index.root.pointers
+        print(index.root)
         print(keySets)
         print(pointerSets)
-        print(key)
+        # create new node from keys and pointers
+        newNode = Node(keySets, pointerSets)
+        print(newNode)
+
         return index
 
     # Returns a boolean that indicates whether a given key
@@ -86,19 +89,6 @@ class ImplementMe:
                 currNode = Node(currKey, currPointer)
                 continue
 
-
-        print("====")
-        keySets = index.root.keys
-        pointerSets = index.root.pointers
-        print(index.root)
-        print(keySets)
-        print(pointerSets)
-
-        print(key)
-
-        # create new node from keys and pointers
-        newNode = Node(keySets, pointerSets)
-        print(newNode)
         return False
 
     # Returns a list of keys in a B+-tree index within the half-open
