@@ -18,11 +18,85 @@ class ImplementMe:
         keySets = index.root.keys
         pointerSets = index.root.pointers
         print(index.root)
+        print("\n ======= \n")
+
         print(keySets)
         print(pointerSets)
+
         # create new node from keys and pointers
         newNode = Node(keySets, pointerSets)
         print(newNode)
+
+        currNode = index.root
+        currKey = currNode.keys
+
+        # insert into empty B+ tree
+        if currKey == KeySet([None, None]):
+            keySets = KeySet([key, index.root.keys.keys[1]])
+            pointerSets = index.root.pointers
+            index = Index(Node(keySets, pointerSets))
+
+
+        while currKey != KeySet([None, None]):
+            ''' Find the correct leaf node to insert '''
+            # set currKey to the left-most key
+            currKeyVal = currKey.keys[0] # int | None
+
+            # find a duplicate, return original B+ tree
+            if key == currKeyVal:
+                return index
+
+            # case 1: key is less than left-most key
+            if key < currKeyVal:
+                # None represent the none Node
+                if currNode.pointers.pointers[0] and currNode.pointers.pointers[0] is not None:
+                    # currNode is not a leaf, go left-side pointer
+                    leftPointer = currNode.pointers.pointers[0]
+                else:
+                    # currNode is a leaf, insert OR insert + balance
+                    pass
+
+                currKey = leftPointer.keys
+                currPointer = leftPointer.pointers  # None represent the none Node
+                currNode = Node(currKey, currPointer)
+                continue
+
+            # set currKey to the right-most key
+            currKeyVal = currKey.keys[1] # int | None
+
+            # find a duplicate, return original B+ tree
+            if key == currKeyVal:
+                return index
+
+            # case 2: key is between left-most and right-most keys
+            if currKeyVal is None or key < currKeyVal:
+                # None represent the none Node
+                if currNode.pointers.pointers[1] and currNode.pointers.pointers[1] is not None:
+                    # currNode is not a leaf, go middle pointer
+                    middlePointer = currNode.pointers.pointers[1]
+                else:
+                    # currNode is a leaf, insert OR insert + balance
+                    pass
+
+                currKey = middlePointer.keys
+                currPointer = middlePointer.pointers  # None represent the none Node
+                currNode = Node(currKey, currPointer)
+                continue
+
+            # case 3: key is greater than right-most key
+            if key > currKeyVal:
+                # None represent the none Node
+                if currNode.pointers.pointers[2] and currNode.pointers.pointers[2] is not None:
+                    # currNode is not a leaf, go right pointer
+                    rightPointer = currNode.pointers.pointers[2]
+                else:
+                    # currNode is a leaf, insert OR insert + balance
+                    pass
+
+                currKey = rightPointer.keys
+                currPointer = rightPointer.pointers  # None represent the none Node
+                currNode = Node(currKey, currPointer)
+                continue
 
         return index
 
@@ -35,6 +109,15 @@ class ImplementMe:
     def LookupKeyInIndex( index, key ):
         currNode = index.root
         currKey = currNode.keys
+
+        keySets = index.root.keys
+        pointerSets = index.root.pointers
+        # print(index.root)
+        # print(keySets)
+        # print(pointerSets)
+        # # create new node from keys and pointers
+        # newNode = Node(keySets, pointerSets)
+        # print(newNode)
 
         while currKey != KeySet([None, None]):
             # set currKey to the left-most key
@@ -76,7 +159,7 @@ class ImplementMe:
                 currNode = Node(currKey, currPointer)
                 continue
 
-            # # go right-side pointer
+            # go right-side pointer
             if key > currKeyVal:
                 # None represent the none Node
                 if currNode.pointers.pointers[2] and currNode.pointers.pointers[2] is not None:
