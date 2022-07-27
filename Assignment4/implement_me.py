@@ -54,7 +54,13 @@ class ImplementMe:
                     leftPointer = currNode.pointers.pointers[0]
                 else:
                     # currNode is a leaf, insert OR insert + balance
-                    pass
+                    if None in currKey.keys:
+                        # space is available to insert
+                        currKey.keys = [min(key, currKey.keys[0]), max(key, currKey.keys[0])]
+                        return index
+                    else:
+                        # split to the next level
+                        pass
 
                 currKey = leftPointer.keys
                 currPointer = leftPointer.pointers  # None represent the none Node
@@ -76,7 +82,13 @@ class ImplementMe:
                     middlePointer = currNode.pointers.pointers[1]
                 else:
                     # currNode is a leaf, insert OR insert + balance
-                    pass
+                    if None in currKey.keys:
+                        # space is available to insert
+                        currKey.keys = [min(key, currKey.keys[0]), max(key, currKey.keys[0])]
+                        return index
+                    else:
+                        # split to the next level
+                        pass
 
                 currKey = middlePointer.keys
                 currPointer = middlePointer.pointers  # None represent the none Node
@@ -91,7 +103,13 @@ class ImplementMe:
                     rightPointer = currNode.pointers.pointers[2]
                 else:
                     # currNode is a leaf, insert OR insert + balance
-                    pass
+                    if None in currKey.keys:
+                        # space is available to insert
+                        currKey.keys = [min(key, currKey.keys[0]), max(key, currKey.keys[0])]
+                        return index
+                    else:
+                        # split to the next level
+                        pass
 
                 currKey = rightPointer.keys
                 currPointer = rightPointer.pointers  # None represent the none Node
