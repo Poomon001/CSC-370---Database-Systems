@@ -84,36 +84,6 @@ class TestCase04(unittest.TestCase):
 
         self.assertEqual( expected_output, ImplementMe.InsertIntoIndex( btree, key ) )
 
-# poomon001: insert 2-level with space
-class TestCaseIV(unittest.TestCase):
-    @timeout_decorator.timeout(15)
-    def test_lookup(self):
-        # 66, 75, 80
-        rootLeft = Node(KeySet([50, None]), PointerSet([None] * Index.FAN_OUT))
-        rootMiddle = Node(KeySet([66, 75]), PointerSet([None] * Index.FAN_OUT))
-        rootRight = None
-
-        rootLeft.pointers.pointers[Index.NUM_KEYS] = rootMiddle
-        rootMiddle.pointers.pointers[Index.NUM_KEYS] = rootRight
-
-        root = Node(KeySet([66, None]), PointerSet([rootLeft, rootMiddle, rootRight]))
-
-        btree = Index(root)
-
-        key = 40
-
-        rootLeft_E = Node(KeySet([40, 50]), PointerSet([None] * Index.FAN_OUT))
-        rootMiddle_E = Node(KeySet([66, 75]), PointerSet([None] * Index.FAN_OUT))
-        rootRight_E = None
-
-        rootLeft_E.pointers.pointers[Index.NUM_KEYS] = rootMiddle_E
-
-        root_E = Node(KeySet([66, None]), PointerSet([rootLeft_E, rootMiddle_E, rootRight_E]))
-
-        expected_output = Index(root_E)
-
-        self.assertEqual(expected_output, ImplementMe.InsertIntoIndex(btree, key))
-
 # poomon002: split and parent is not full (from right)
 class TestCaseV(unittest.TestCase):
     @timeout_decorator.timeout(15)
@@ -124,7 +94,6 @@ class TestCaseV(unittest.TestCase):
         rootRight = None
 
         rootLeft.pointers.pointers[Index.NUM_KEYS] = rootMiddle
-        rootMiddle.pointers.pointers[Index.NUM_KEYS] = rootRight
 
         root = Node(KeySet([75, None]), PointerSet([rootLeft, rootMiddle, rootRight]))
 
@@ -145,8 +114,81 @@ class TestCaseV(unittest.TestCase):
 
         self.assertEqual(expected_output, ImplementMe.InsertIntoIndex(btree, key))
 
-# poomon003
+# poomon003: split and parent is not full (from left)
 class TestCaseVI(unittest.TestCase):
+    @timeout_decorator.timeout(15)
+    def test_lookup(self):
+        # 66, 75, 80, 70
+        rootLeft = Node(KeySet([66, 70]), PointerSet([None] * Index.FAN_OUT))
+        rootMiddle = Node(KeySet([75, 80]), PointerSet([None] * Index.FAN_OUT))
+        rootRight = None
+
+        rootLeft.pointers.pointers[Index.NUM_KEYS] = rootMiddle
+
+        root = Node(KeySet([75, None]), PointerSet([rootLeft, rootMiddle, rootRight]))
+
+        btree = Index(root)
+
+        key = 10
+
+        rootLeft_E = Node(KeySet([10, None]), PointerSet([None] * Index.FAN_OUT))
+        rootMiddle_E = Node(KeySet([66, 70]), PointerSet([None] * Index.FAN_OUT))
+        rootRight_E = Node(KeySet([75, 80]), PointerSet([None] * Index.FAN_OUT))
+
+        rootLeft_E.pointers.pointers[Index.NUM_KEYS] = rootMiddle_E
+        rootMiddle_E.pointers.pointers[Index.NUM_KEYS] = rootRight_E
+
+        root_E = Node(KeySet([66, 75]), PointerSet([rootLeft_E, rootMiddle_E, rootRight_E]))
+
+        expected_output = Index(root_E)
+
+        self.assertEqual(expected_output, ImplementMe.InsertIntoIndex(btree, key))
+
+# poomon004: add node from third level to second level after spliting
+class TestCaseVII(unittest.TestCase):
+    @timeout_decorator.timeout(15)
+    def test_lookup(self):
+        # 66, 75, 80, 100, 95
+        rootLeftLeft = Node(KeySet([66, None]), PointerSet([None] * Index.FAN_OUT))
+        rootLeftRight = Node(KeySet([75, None]), PointerSet([None] * Index.FAN_OUT))
+        rootRightLeft = Node(KeySet([80, None]), PointerSet([None] * Index.FAN_OUT))
+        rootRightRight = Node(KeySet([95, 100]), PointerSet([None] * Index.FAN_OUT))
+
+        rootLeftLeft.pointers.pointers[Index.NUM_KEYS] = rootLeftRight
+        rootLeftRight.pointers.pointers[Index.NUM_KEYS] = rootRightLeft
+        rootRightLeft.pointers.pointers[Index.NUM_KEYS] = rootRightRight
+
+        rootLeft = Node(KeySet([75, None]), PointerSet([rootLeftLeft, rootLeftRight, None]))
+        rootRight = Node(KeySet([95, None]), PointerSet([rootRightLeft, rootRightRight, None]))
+
+        root = Node(KeySet([80, None]), PointerSet([rootLeft, rootRight, None]))
+
+        btree = Index(root)
+
+        key = 96
+
+        rootLeftLeft_E = Node(KeySet([66, None]), PointerSet([None] * Index.FAN_OUT))
+        rootLeftRight_E = Node(KeySet([75, None]), PointerSet([None] * Index.FAN_OUT))
+        rootRightLeft_E = Node(KeySet([80, None]), PointerSet([None] * Index.FAN_OUT))
+        rootRightMiddle_E = Node(KeySet([95, None]), PointerSet([None] * Index.FAN_OUT))
+        rootRightRight_E = Node(KeySet([96, 100]), PointerSet([None] * Index.FAN_OUT))
+
+        rootLeftLeft_E.pointers.pointers[Index.NUM_KEYS] = rootLeftRight_E
+        rootLeftRight_E.pointers.pointers[Index.NUM_KEYS] = rootRightLeft_E
+        rootRightLeft_E.pointers.pointers[Index.NUM_KEYS] = rootRightMiddle_E
+        rootRightMiddle_E.pointers.pointers[Index.NUM_KEYS] = rootRightRight_E
+
+        rootLeft_E = Node(KeySet([75, None]), PointerSet([rootLeftLeft_E, rootLeftRight_E, None]))
+        rootRight_E = Node(KeySet([95, 96]), PointerSet([rootRightLeft_E, rootRightMiddle_E, rootRightRight_E]))
+
+        root_E = Node(KeySet([80, None]), PointerSet([rootLeft_E, rootRight_E, None]))
+
+        expected_output = Index(root_E)
+
+        self.assertEqual(expected_output, ImplementMe.InsertIntoIndex(btree, key))
+
+# poomon005: split to create third level
+class TestCaseVIII(unittest.TestCase):
     @timeout_decorator.timeout(15)
     def test_lookup(self):
         # 66, 75, 80, 100, 95
