@@ -54,7 +54,7 @@ class ImplementMe:
             # case 1: key is less than left-most key
             if key < currKeyVal:
                 # None represent the none Node
-                if currNode.pointers.pointers[0] and currNode.pointers.pointers[0] is not None:
+                if currNode.pointers.pointers[0] is not None:
                     # currNode is not a leaf, go left-side pointer
                     currNode = currNode.pointers.pointers[0]
                     currKey = currNode.keys
@@ -71,7 +71,7 @@ class ImplementMe:
             # case 2: key is between left-most and right-most keys
             if currKeyVal is None or key < currKeyVal:
                 # None represent the none Node
-                if currNode.pointers.pointers[0] and currNode.pointers.pointers[0] is not None:
+                if currNode.pointers.pointers[0] is not None:
                     # currNode is not a leaf, go middle pointer
                     currNode = currNode.pointers.pointers[1]
                     currKey = currNode.keys
@@ -81,7 +81,7 @@ class ImplementMe:
             # case 3: key is greater than right-most key
             if currKeyVal and key > currKeyVal:
                 # None represent the none Node
-                if currNode.pointers.pointers[0] and currNode.pointers.pointers[0] is not None:
+                if currNode.pointers.pointers[0] is not None:
                     # currNode is not a leaf, go right pointer
                     currNode = currNode.pointers.pointers[2]
                     currKey = currNode.keys
@@ -115,23 +115,140 @@ class ImplementMe:
                         currNode.pointers.pointers[Index.NUM_KEYS] = rightNode
                         break
 
-                    # insert at a leaf
-                    if leftNode and rightNode:
-                        prev = None
-                        print("+++++")
-                        p = parent
+                    # add split key to parent
+                    if None in parent.keys.keys:
+                        # space is available
+                        parent.keys.keys = [min(parent.keys.keys[0], key), max(parent.keys.keys[0], key)]
+                    else:
+                        # no space, split to the next level
+                        nums = sorted([parent.keys[0], parent.keys[1], key])
+                        parent.keys = KeySet(nums[0], nums[1])
+                        splitKey.append(nums[2])
+
+                    # find a location in leaf and insert
+                    if currNode.pointers.pointers[0] is None:
                         for i in range(len(parent.pointers.pointers)):
-                            print(i)
-                        # # edit pointer
-                        # parent.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = leftNode
-                        # # edit leaf
-                        leftNode = rightNode = []
+                            if i != 0 and parent.pointers.pointers[i-1] == currNode:
+                                parent.pointers.pointers[i] = rightNode
 
-
+                                if i < len(parent.pointers.pointers) - 1:
+                                    parent.pointers.pointers[i].pointers.pointers[Index.NUM_KEYS] = parent.pointers.pointers[i+1]
 
                     # split to upper level
 
                 return Index(parent)
+                #
+                #             # edit keys
+                #             if None in parent.keys.keys:
+                #                 parent.keys.keys[1] = key
+                #             else:
+                #                 nums = sorted([parent.keys[0], parent.keys[1], key])
+                #                 parent.keys = KeySet(nums[0], nums[1])
+                #                 splitKey.append(nums[2])
+                #
+                #             # edit pointers on a leaf level
+                #             if leftNode and rightNode:
+                #                 # edit pointer
+                #                 leftNode.pointers.pointers[Index.NUM_KEYS] = rightNode
+                #                 parent.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = leftNode
+                #                 # edit leaf
+                #                 parent.pointers.pointers[1] = leftNode
+                #                 parent.pointers.pointers[2] = rightNode
+                #                 leftNode = rightNode = []
+                #
+                #         return Index(parent)
+
+                # else:
+                #     # currNode is a leaf, insert OR insert + balance
+                #     if None in currKey.keys:
+                #         # space is available to insert
+                #         currKey.keys = [min(key, currKey.keys[0]), max(key, currKey.keys[0])]
+                #         return index
+                #     else:
+                #         # split to the next level
+                #         nums = sorted([currKey.keys[0], currKey.keys[1], key])
+                #         splitKey.append(nums[1])
+                #         leftNode = Node(KeySet([nums[0], None]), PointerSet([None] * Index.FAN_OUT))
+                #         rightNode = Node(KeySet([nums[1], nums[2]]), PointerSet([None] * Index.FAN_OUT))
+                #
+                #         path.pop()
+                #
+                #         # add to the next level
+                #         while splitKey:
+                #             key = splitKey.pop()
+                #             if path:
+                #                 parent = path.pop()
+                #             else:
+                #                 parent = Node(KeySet([key, None]), PointerSet([leftNode, rightNode, None]))
+                #                 leftNode.pointers.pointers[Index.NUM_KEYS] = rightNode
+                #                 return Index(parent)
+                #
+                #             # edit keys
+                #             if None in parent.keys.keys:
+                #                 parent.keys.keys[1] = KeySet(min(parent.keys.keys[1], key), max(parent.keys.keys[1], key))
+                #             else:
+                #                 nums = sorted([parent.keys[0], parent.keys[1], key])
+                #                 parent.keys = KeySet(nums[0], nums[1])
+                #                 splitKey.append(nums[2])
+                #
+                #             # edit pointers on a leaf level
+                #             if leftNode and rightNode:
+                #                 # edit pointer
+                #                 leftNode.pointers.pointers[Index.NUM_KEYS] = rightNode
+                #                 parent.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = leftNode
+                #                 # edit leaf
+                #                 parent.pointers.pointers[1] = leftNode
+                #                 parent.pointers.pointers[2] = rightNode
+                #                 leftNode = rightNode = []
+                #
+                #         return Index(parent)
+
+
+                # else:
+                #     # currNode is a leaf, insert OR insert + balance
+                #     if None in currKey.keys:
+                #         # space is available to insert
+                #         currKey.keys = [min(key, currKey.keys[0]), max(key, currKey.keys[0])]
+                #         return index
+                #     else:
+                #         # split
+                #         nums = sorted([currKey.keys[0], currKey.keys[1], key])
+                #         splitKey.append(nums[1])
+                #         leftNode = Node(KeySet([nums[0], None]), PointerSet([None] * Index.FAN_OUT))
+                #         rightNode = Node(KeySet([nums[1], nums[2]]), PointerSet([None] * Index.FAN_OUT))
+                #
+                #         path.pop()
+                #
+                #         # add to the next level
+                #         while splitKey:
+                #             key = splitKey.pop()
+                #             if path:
+                #                 parent = path.pop()
+                #             else:
+                #                 parent = Node(KeySet([key, None]), PointerSet([leftNode, rightNode, None]))
+                #                 leftNode.pointers.pointers[Index.NUM_KEYS] = rightNode
+                #                 return Index(parent)
+                #
+                #             # edit keys
+                #             if None in parent.keys.keys:
+                #                 parent.keys.keys[1] = key
+                #             else:
+                #                 nums = sorted([parent.keys[0], parent.keys[1], key])
+                #                 parent.keys = KeySet(nums[0], nums[1])
+                #                 splitKey.append(nums[2])
+                #
+                #             # edit pointers on a leaf level
+                #             if leftNode and rightNode:
+                #                 # edit pointer
+                #                 leftNode.pointers.pointers[Index.NUM_KEYS] = rightNode
+                #                 parent.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = leftNode
+                #                 # edit leaf
+                #                 parent.pointers.pointers[1] = leftNode
+                #                 parent.pointers.pointers[2] = rightNode
+                #                 leftNode = rightNode = []
+                #
+                #         return Index(parent)
+                #
 
         return index
 
