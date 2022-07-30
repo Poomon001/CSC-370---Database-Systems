@@ -5,7 +5,6 @@ from index import *
 # You should implement all of the static functions declared
 # in the ImplementMe class and submit this (and only this!) file.
 class ImplementMe:
-
     # Returns a B+-tree obtained by inserting a key into a pre-existing
     # B+-tree index if the key is not already there. If it already exists,
     # the return value is equivalent to the original, input tree.
@@ -29,6 +28,8 @@ class ImplementMe:
 
         currNode = index.root
         currKey = currNode.keys
+        path = []
+        splitKey = []
 
         # insert into empty B+ tree
         if currKey == KeySet([None, None]):
@@ -38,9 +39,13 @@ class ImplementMe:
 
 
         while currKey != KeySet([None, None]):
-            ''' Find the correct leaf node to insert '''
+            # save current path
+            path.append(currNode)
+
             # set currKey to the left-most key
             currKeyVal = currKey.keys[0] # int | None
+
+            ''' Traverse to a leaf node '''
 
             # find a duplicate, return original B+ tree
             if key == currKeyVal:
@@ -51,24 +56,13 @@ class ImplementMe:
                 # None represent the none Node
                 if currNode.pointers.pointers[0] and currNode.pointers.pointers[0] is not None:
                     # currNode is not a leaf, go left-side pointer
-                    leftPointer = currNode.pointers.pointers[0]
-                else:
-                    # currNode is a leaf, insert OR insert + balance
-                    if None in currKey.keys:
-                        # space is available to insert
-                        currKey.keys = [min(key, currKey.keys[0]), max(key, currKey.keys[0])]
-                        return index
-                    else:
-                        # split to the next level
-                        pass
-
-                currKey = leftPointer.keys
-                currPointer = leftPointer.pointers  # None represent the none Node
-                currNode = Node(currKey, currPointer)
-                continue
+                    currNode = currNode.pointers.pointers[0]
+                    currKey = currNode.keys
+                    currPointer = currNode.pointers  # None represent the none Node
+                    continue
 
             # set currKey to the right-most key
-            currKeyVal = currKey.keys[1] # int | None
+            currKeyVal = currKey.keys[1]  # int | None
 
             # find a duplicate, return original B+ tree
             if key == currKeyVal:
@@ -77,44 +71,67 @@ class ImplementMe:
             # case 2: key is between left-most and right-most keys
             if currKeyVal is None or key < currKeyVal:
                 # None represent the none Node
-                if currNode.pointers.pointers[1] and currNode.pointers.pointers[1] is not None:
+                if currNode.pointers.pointers[0] and currNode.pointers.pointers[0] is not None:
                     # currNode is not a leaf, go middle pointer
-                    middlePointer = currNode.pointers.pointers[1]
-                else:
-                    # currNode is a leaf, insert OR insert + balance
-                    if None in currKey.keys:
-                        # space is available to insert
-                        currKey.keys = [min(key, currKey.keys[0]), max(key, currKey.keys[0])]
-                        return index
-                    else:
-                        # split to the next level
-                        pass
-
-                currKey = middlePointer.keys
-                currPointer = middlePointer.pointers  # None represent the none Node
-                currNode = Node(currKey, currPointer)
-                continue
+                    currNode = currNode.pointers.pointers[1]
+                    currKey = currNode.keys
+                    currPointer = currNode.pointers  # None represent the none Node
+                    continue
 
             # case 3: key is greater than right-most key
-            if key > currKeyVal:
+            if currKeyVal and key > currKeyVal:
                 # None represent the none Node
-                if currNode.pointers.pointers[2] and currNode.pointers.pointers[2] is not None:
+                if currNode.pointers.pointers[0] and currNode.pointers.pointers[0] is not None:
                     # currNode is not a leaf, go right pointer
-                    rightPointer = currNode.pointers.pointers[2]
-                else:
-                    # currNode is a leaf, insert OR insert + balance
-                    if None in currKey.keys:
-                        # space is available to insert
-                        currKey.keys = [min(key, currKey.keys[0]), max(key, currKey.keys[0])]
-                        return index
-                    else:
-                        # split to the next level
-                        pass
+                    currNode = currNode.pointers.pointers[2]
+                    currKey = currNode.keys
+                    currPointer = currNode.pointers  # None represent the none Node
+                    continue
 
-                currKey = rightPointer.keys
-                currPointer = rightPointer.pointers  # None represent the none Node
-                currNode = Node(currKey, currPointer)
-                continue
+            ''' insertion at a leaf '''
+            # space is available to insert
+            path.pop()
+            if None in currKey.keys:
+                 currKey.keys = [min(key, currKey.keys[0]), max(key, currKey.keys[0])]
+                 return index
+            else:
+                # split to the next level
+                nums = sorted([currKey.keys[0], currKey.keys[1], key])
+                splitKey.append(nums[1])
+                currNode.keys = KeySet([nums[0], None])
+                currNode.pointers = PointerSet([None] * Index.FAN_OUT)
+                rightNode = Node(KeySet([nums[1], nums[2]]), PointerSet([None] * Index.FAN_OUT))
+                currNode.pointers.pointers[Index.NUM_KEYS] = rightNode
+
+                # add to the next level
+                while splitKey:
+                    key = splitKey.pop()
+                    if path:
+                        # still parent left
+                        parent = path.pop()
+                    else:
+                        # no parent left
+                        parent = Node(KeySet([key, None]), PointerSet([currNode, rightNode, None]))
+                        currNode.pointers.pointers[Index.NUM_KEYS] = rightNode
+                        break
+
+                    # insert at a leaf
+                    if leftNode and rightNode:
+                        prev = None
+                        print("+++++")
+                        p = parent
+                        for i in range(len(parent.pointers.pointers)):
+                            print(i)
+                        # # edit pointer
+                        # parent.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = leftNode
+                        # # edit leaf
+                        leftNode = rightNode = []
+
+
+
+                    # split to upper level
+
+                return Index(parent)
 
         return index
 

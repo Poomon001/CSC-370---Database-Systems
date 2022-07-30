@@ -60,73 +60,126 @@ class TestCase03(unittest.TestCase):
         self.assertEqual( expected_output, ImplementMe.InsertIntoIndex( btree, key ) )
 
 
-# Insert into full node.
+# Insert into full node: 1 level
 class TestCase04(unittest.TestCase):
     @timeout_decorator.timeout(15)
     def test_insertion(self):
         btree = Index(Node(\
             KeySet([66, 99]),\
             PointerSet([None]*Index.FAN_OUT)))
-        key = 87
+        key = 50
 
         expected_output = Index(Node(\
-            KeySet([87, None]),\
+            KeySet([66, None]),\
             PointerSet([Node(\
-                KeySet([66, None]),\
+                KeySet([50,None]),\
                 PointerSet([None]*Index.FAN_OUT)),\
             Node(\
-                KeySet([87,99]),\
+                KeySet([66, 99]),\
                 PointerSet([None]*Index.FAN_OUT)
-                )])))
+                ),\
+            None])))
         expected_output.root.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = \
          expected_output.root.pointers.pointers[1]
 
         self.assertEqual( expected_output, ImplementMe.InsertIntoIndex( btree, key ) )
 
+# poomon001: insert 2-level with space
 class TestCaseIV(unittest.TestCase):
     @timeout_decorator.timeout(15)
-    def test_insertion(self):
-        btree = Index(Node(\
-            KeySet([87, None]),\
-            PointerSet([None]*Index.FAN_OUT)))
-        key = 9
-
-        expected_output = Index(Node(\
-            KeySet([9, 87]),\
-            PointerSet([None]*Index.FAN_OUT)))
-
-        self.assertEqual( expected_output, ImplementMe.InsertIntoIndex( btree, key ) )
-
-# poomon003; test insertion
-class TestCaseV(unittest.TestCase):
-    @timeout_decorator.timeout(15)
     def test_lookup(self):
-
-        rootLeft = Node(KeySet([66, None]), PointerSet([None] * Index.FAN_OUT))
-        rootMiddle = Node(KeySet([75, 80]), PointerSet([None] * Index.FAN_OUT))
-        rootRight = Node(KeySet([87, 99]), PointerSet([None] * Index.FAN_OUT))
+        # 66, 75, 80
+        rootLeft = Node(KeySet([50, None]), PointerSet([None] * Index.FAN_OUT))
+        rootMiddle = Node(KeySet([66, 75]), PointerSet([None] * Index.FAN_OUT))
+        rootRight = None
 
         rootLeft.pointers.pointers[Index.NUM_KEYS] = rootMiddle
         rootMiddle.pointers.pointers[Index.NUM_KEYS] = rootRight
 
-        root = Node(KeySet([75, 87]), PointerSet([rootLeft, rootMiddle, rootRight]))
+        root = Node(KeySet([66, None]), PointerSet([rootLeft, rootMiddle, rootRight]))
 
         btree = Index(root)
 
-        key = 55
+        key = 40
 
-        rootLeft_E = Node(KeySet([55, 66]), PointerSet([None] * Index.FAN_OUT))
-        rootMiddle_E = Node(KeySet([75, 80]), PointerSet([None] * Index.FAN_OUT))
-        rootRight_E = Node(KeySet([87, 99]), PointerSet([None] * Index.FAN_OUT))
+        rootLeft_E = Node(KeySet([40, 50]), PointerSet([None] * Index.FAN_OUT))
+        rootMiddle_E = Node(KeySet([66, 75]), PointerSet([None] * Index.FAN_OUT))
+        rootRight_E = None
+
+        rootLeft_E.pointers.pointers[Index.NUM_KEYS] = rootMiddle_E
+
+        root_E = Node(KeySet([66, None]), PointerSet([rootLeft_E, rootMiddle_E, rootRight_E]))
+
+        expected_output = Index(root_E)
+
+        self.assertEqual(expected_output, ImplementMe.InsertIntoIndex(btree, key))
+
+# poomon002: split and parent is not full (from right)
+class TestCaseV(unittest.TestCase):
+    @timeout_decorator.timeout(15)
+    def test_lookup(self):
+        # 66, 75, 80, 100
+        rootLeft = Node(KeySet([66, None]), PointerSet([None] * Index.FAN_OUT))
+        rootMiddle = Node(KeySet([75, 80]), PointerSet([None] * Index.FAN_OUT))
+        rootRight = None
+
+        rootLeft.pointers.pointers[Index.NUM_KEYS] = rootMiddle
+        rootMiddle.pointers.pointers[Index.NUM_KEYS] = rootRight
+
+        root = Node(KeySet([75, None]), PointerSet([rootLeft, rootMiddle, rootRight]))
+
+        btree = Index(root)
+
+        key = 100
+
+        rootLeft_E = Node(KeySet([66, None]), PointerSet([None] * Index.FAN_OUT))
+        rootMiddle_E = Node(KeySet([75, None]), PointerSet([None] * Index.FAN_OUT))
+        rootRight_E = Node(KeySet([80, 100]), PointerSet([None] * Index.FAN_OUT))
 
         rootLeft_E.pointers.pointers[Index.NUM_KEYS] = rootMiddle_E
         rootMiddle_E.pointers.pointers[Index.NUM_KEYS] = rootRight_E
 
-        root_E = Node(KeySet([75, 87]), PointerSet([rootLeft_E, rootMiddle_E, rootRight_E]))
+        root_E = Node(KeySet([75, 80]), PointerSet([rootLeft_E, rootMiddle_E, rootRight_E]))
 
         expected_output = Index(root_E)
 
-        self.assertEqual(expected_output, ImplementMe.InsertIntoIndex( btree, key ))
+        self.assertEqual(expected_output, ImplementMe.InsertIntoIndex(btree, key))
+
+# poomon003
+class TestCaseVI(unittest.TestCase):
+    @timeout_decorator.timeout(15)
+    def test_lookup(self):
+        # 66, 75, 80, 100, 95
+        rootLeft = Node(KeySet([66, None]), PointerSet([None] * Index.FAN_OUT))
+        rootMiddle = Node(KeySet([75, None]), PointerSet([None] * Index.FAN_OUT))
+        rootRight = Node(KeySet([80, 100]), PointerSet([None] * Index.FAN_OUT))
+
+        rootLeft.pointers.pointers[Index.NUM_KEYS] = rootMiddle
+        rootMiddle.pointers.pointers[Index.NUM_KEYS] = rootRight
+
+        root = Node(KeySet([75, 80]), PointerSet([rootLeft, rootMiddle, rootRight]))
+
+        btree = Index(root)
+
+        key = 95
+
+        rootLeftLeft_E = Node(KeySet([66, None]), PointerSet([None] * Index.FAN_OUT))
+        rootLeftRight_E = Node(KeySet([75, None]), PointerSet([None] * Index.FAN_OUT))
+        rootRightLeft_E = Node(KeySet([80, None]), PointerSet([None] * Index.FAN_OUT))
+        rootRightRight_E = Node(KeySet([95, 100]), PointerSet([None] * Index.FAN_OUT))
+
+        rootLeftLeft_E.pointers.pointers[Index.NUM_KEYS] = rootLeftRight_E
+        rootLeftRight_E.pointers.pointers[Index.NUM_KEYS] = rootRightLeft_E
+        rootRightLeft_E.pointers.pointers[Index.NUM_KEYS] = rootRightRight_E
+
+        rootLeft_E = Node(KeySet([75, None]), PointerSet([rootLeftLeft_E, rootLeftRight_E, None]))
+        rootRight_E = Node(KeySet([95, None]), PointerSet([rootRightLeft_E, rootRightRight_E, None]))
+
+        root_E = Node(KeySet([80, None]), PointerSet([rootLeft_E, rootRight_E, None]))
+
+        expected_output = Index(root_E)
+
+        self.assertEqual(expected_output, ImplementMe.InsertIntoIndex(btree, key))
 
 
 # Insert into full node with full parent, causing root split.
@@ -146,11 +199,46 @@ class TestCase05(unittest.TestCase):
 class TestCase06(unittest.TestCase):
     @timeout_decorator.timeout(25)
     def test_insertion(self):
-        btree = Index()
-        key = 12
+        leaf4 = Node(\
+            KeySet([97,99]),\
+            PointerSet([None]*3))
+        leaf3 = Node(\
+            KeySet([87, None]),\
+            PointerSet(None,None,leaf4))
+        leaf2 = Node(\
+            KeySet([66,None]),\
+            PointerSet([None,None,leaf3]))
+        leaf1 = Node(\
+            KeySet([27,None]),\
+            PointerSet([None,None,leaf2]))
+        leaf0 = Node(\
+            KeySet([7,9]),\
+            PointerSet([None,None,leaf1]))
+        parent1 = Node(\
+            KeySet([97]),\
+            PointerSet([leaf3,leaf4,None]))
+        parent0 = Node(\
+            KeySet([27,66]),\
+            PointerSet([leaf0,leaf1,leaf2]))
+        root = Node(\
+            KeySet([87,None]),\
+            PointerSet([parent0,parent1,None]))
+        btree = Index(root)
 
-
-        expected_output = Index()
+        key = 5
+        newLeaf0 = Node(\
+            KeySet([5,None]),\
+            PointerSet([None,None,leaf0]))
+        newParent0 = Node(\
+            KeySet([7,None]),\
+            PointerSet([newLeaf0,leaf0,None]))
+        newNextParent = Node(\
+            KeySet([66,None]),\
+            PointerSet([leaf1,leaf2,None]))
+        newRoot = Node(\
+            KeySet([27,87]),\
+            PointerSet([newParent0,newNextParent,leaf2]))
+        expected_output = Index(newRoot)
 
         self.assertEqual( expected_output, ImplementMe.InsertIntoIndex( btree, key ) )
 
@@ -179,7 +267,8 @@ class TestCase08(unittest.TestCase):
             Node(\
                 KeySet([87,99]),\
                 PointerSet([None]*Index.FAN_OUT)
-                )])))
+                ),\
+            None])))
         btree.root.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = \
          btree.root.pointers.pointers[1]
 
@@ -203,7 +292,8 @@ class TestCase09(unittest.TestCase):
             Node(\
                 KeySet([87,99]),\
                 PointerSet([None]*Index.FAN_OUT)
-                )])))
+                ),\
+            None])))
         btree.root.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = \
          btree.root.pointers.pointers[1]
 
@@ -229,7 +319,8 @@ class TestCase10(unittest.TestCase):
             Node(\
                 KeySet([87,99]),\
                 PointerSet([None]*Index.FAN_OUT)
-                )])))
+                ),\
+            None])))
         btree.root.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = \
          btree.root.pointers.pointers[1]
 
@@ -253,7 +344,8 @@ class TestCase11(unittest.TestCase):
             Node(\
                 KeySet([87,99]),\
                 PointerSet([None]*Index.FAN_OUT)
-                )])))
+                ),\
+            None])))
         btree.root.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = \
          btree.root.pointers.pointers[1]
 
@@ -275,78 +367,62 @@ class TestCase12(unittest.TestCase):
             Node(\
                 KeySet([87,99]),\
                 PointerSet([None]*Index.FAN_OUT)
-                )])))
+                ),\
+            None])))
         btree.root.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = \
          btree.root.pointers.pointers[1]
 
-        key = 66
+        key = 99
 
         expected_output = True
 
         self.assertEqual( expected_output, ImplementMe.LookupKeyInIndex( btree, key ) )
 
-# poomon000
-class TestCaseIX(unittest.TestCase):
-    @timeout_decorator.timeout(15)
-    def test_lookup(self):
-        btree = Index(Node( \
-            KeySet([87, None]), \
-            PointerSet([None] * Index.FAN_OUT)))
-
-        key = 99
-
-        expected_output = False
-
-        self.assertEqual(expected_output, ImplementMe.LookupKeyInIndex(btree, key))
-
-
-# poomon001
+# Lookup key strictly within the tree's range
 class TestCaseX(unittest.TestCase):
     @timeout_decorator.timeout(15)
     def test_lookup(self):
-        rootRightRight = Node(KeySet([200, 300]), PointerSet([None]* Index.FAN_OUT))
-        rootRightLeft = Node(KeySet([99, None]), PointerSet([None]* Index.FAN_OUT))
-        rootRightLeft.pointers.pointers[Index.NUM_KEYS] = rootRightRight
+        # 66, 75, 80, 100, 95
+        rootLeftLeft_E = Node(KeySet([66, None]), PointerSet([None] * Index.FAN_OUT))
+        rootLeftRight_E = Node(KeySet([75, None]), PointerSet([None] * Index.FAN_OUT))
+        rootRightLeft_E = Node(KeySet([80, None]), PointerSet([None] * Index.FAN_OUT))
+        rootRightRight_E = Node(KeySet([95, 100]), PointerSet([None] * Index.FAN_OUT))
 
-        rootLeafRight = Node(KeySet([87, None]), PointerSet([None]* Index.FAN_OUT))
-        rootLeftLeaf = Node(KeySet([66, 75]), PointerSet([None]* Index.FAN_OUT))
-        rootLeafRight.pointers.pointers[Index.NUM_KEYS] = rootRightLeft
-        rootLeftLeaf.pointers.pointers[Index.NUM_KEYS] = rootLeafRight
+        rootLeftLeft_E.pointers.pointers[Index.NUM_KEYS] = rootLeftRight_E
+        rootLeftRight_E.pointers.pointers[Index.NUM_KEYS] = rootRightLeft_E
+        rootRightLeft_E.pointers.pointers[Index.NUM_KEYS] = rootRightRight_E
 
-        rootLeaf = Node(KeySet([87, None]), PointerSet([rootLeftLeaf, rootLeafRight]))
-        rootRight = Node(KeySet([200, None]), PointerSet([rootRightLeft, rootRightRight]))
+        rootLeft_E = Node(KeySet([75, None]), PointerSet([rootLeftLeft_E, rootLeftRight_E, None]))
+        rootRight_E = Node(KeySet([95, None]), PointerSet([rootRightLeft_E, rootRightRight_E, None]))
 
-        root = Node(KeySet([99, None]), PointerSet([rootLeaf, rootRight]))
+        root_E = Node(KeySet([80, None]), PointerSet([rootLeft_E, rootRight_E, None]))
 
-        btree = Index(root)
+        btree = Index(root_E)
+        key = 0
 
-        key = 66
+        expected_output = False
 
-        expected_output = True
+        self.assertEqual( expected_output, ImplementMe.LookupKeyInIndex( btree, key ) )
 
-        self.assertEqual(expected_output, ImplementMe.LookupKeyInIndex(btree, key))
-
-# poomon002
 class TestCaseXI(unittest.TestCase):
     @timeout_decorator.timeout(15)
     def test_lookup(self):
-
-        rootLeft = Node(KeySet([66, None]), PointerSet([None] * Index.FAN_OUT))
-        rootMiddle = Node(KeySet([75, 80]), PointerSet([None] * Index.FAN_OUT))
-        rootRight = Node(KeySet([87, 99]), PointerSet([None] * Index.FAN_OUT))
+        # 87, 41, 99, 66, 120
+        rootLeft = Node(KeySet([41, 66]), PointerSet([None] * Index.FAN_OUT))
+        rootMiddle = Node(KeySet([87, None]), PointerSet([None] * Index.FAN_OUT))
+        rootRight = Node(KeySet([99, 120]), PointerSet([None] * Index.FAN_OUT))
 
         rootLeft.pointers.pointers[Index.NUM_KEYS] = rootMiddle
         rootMiddle.pointers.pointers[Index.NUM_KEYS] = rootRight
 
-        root = Node(KeySet([75, 87]), PointerSet([rootLeft, rootMiddle, rootRight]))
+        root = Node(KeySet([87, 99]), PointerSet([rootLeft, rootMiddle, rootRight]))
 
         btree = Index(root)
-
-        key = 100
+        key = 90
 
         expected_output = False
 
-        self.assertEqual(expected_output, ImplementMe.LookupKeyInIndex(btree, key))
+        self.assertEqual( expected_output, ImplementMe.LookupKeyInIndex( btree, key ) )
 
 
 # Range query fully contained in one leaf node
@@ -361,7 +437,8 @@ class TestCase13(unittest.TestCase):
             Node(\
                 KeySet([87,99]),\
                 PointerSet([None]*Index.FAN_OUT)
-                )])))
+                ),\
+            None])))
         btree.root.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = \
          btree.root.pointers.pointers[1]
 
@@ -385,7 +462,8 @@ class TestCase14(unittest.TestCase):
             Node(\
                 KeySet([87,99]),\
                 PointerSet([None]*Index.FAN_OUT)
-                )])))
+                ),\
+            None])))
         btree.root.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = \
          btree.root.pointers.pointers[1]
 
@@ -409,7 +487,8 @@ class TestCase15(unittest.TestCase):
             Node(\
                 KeySet([87,99]),\
                 PointerSet([None]*Index.FAN_OUT)
-                )])))
+                ),\
+            None])))
         btree.root.pointers.pointers[0].pointers.pointers[Index.NUM_KEYS] = \
          btree.root.pointers.pointers[1]
 
@@ -465,12 +544,36 @@ class TestCase18(unittest.TestCase):
 class TestCase19(unittest.TestCase):
     @timeout_decorator.timeout(15)
     def test_unknown(self):
-        btree = Index()
-        key = 12
-        lower_bound = 12
-        upper_bound = 66
+        leaf4 = Node(\
+            KeySet([97,99]),\
+            PointerSet([None]*3))
+        leaf3 = Node(\
+            KeySet([87, None]),\
+            PointerSet(None,None,leaf4))
+        leaf2 = Node(\
+            KeySet([66,None]),\
+            PointerSet([None,None,leaf3]))
+        leaf1 = Node(\
+            KeySet([27,None]),\
+            PointerSet([None,None,leaf2]))
+        leaf0 = Node(\
+            KeySet([7,9]),\
+            PointerSet([None,None,leaf1]))
+        parent1 = Node(\
+            KeySet([97]),\
+            PointerSet([leaf3,leaf4,None]))
+        parent0 = Node(\
+            KeySet([27,66]),\
+            PointerSet([leaf0,leaf1,leaf2]))
+        root = Node(\
+            KeySet([87,None]),\
+            PointerSet([parent0,parent1,None]))
+        btree = Index(root)
+        key = 5
+        lower_bound = 1
+        upper_bound = 68
 
-        expected_output = [12,27]
+        expected_output = [5,7,9,27,66]
 
         self.assertEqual( expected_output, ImplementMe.RangeSearchInIndex(\
         ImplementMe.InsertIntoIndex( btree, key ), lower_bound, upper_bound ) )
