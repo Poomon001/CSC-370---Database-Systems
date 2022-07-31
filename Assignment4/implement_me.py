@@ -41,6 +41,9 @@ class ImplementMe:
         while currKey != KeySet([None, None]):
             # save current path
             path.append(currNode)
+            ''' ADDED '''
+            # path.append(currNode)
+            ''' ADDED '''
 
             # set currKey to the left-most key
             currKeyVal = currKey.keys[0] # int | None
@@ -91,7 +94,9 @@ class ImplementMe:
             ''' insertion at a leaf '''
             # space is available to insert
             path.pop()
-
+            ''' ADDED '''
+            # path.pop()
+            ''' ADDED '''
             if None in currKey.keys:
                  currKey.keys = [min(key, currKey.keys[0]), max(key, currKey.keys[0])]
                  return index

@@ -234,7 +234,7 @@ class TestCaseIX(unittest.TestCase):
 class TestCaseVIII(unittest.TestCase):
     @timeout_decorator.timeout(15)
     def test_lookup(self):
-        # 66, 75, 80, 100, 50, 77, 78, 10, 70
+        # 66, 75, 80, 100, 50, 77, 78, 10
         rootLeftLeft = Node(KeySet([10, None]), PointerSet([None] * Index.FAN_OUT))
         rootLeftMiddle = Node(KeySet([50, 66]), PointerSet([None] * Index.FAN_OUT))
         rootLeftRight = Node(KeySet([75, None]), PointerSet([None] * Index.FAN_OUT))
@@ -275,6 +275,73 @@ class TestCaseVIII(unittest.TestCase):
         rootRight_E = Node(KeySet([80, None]), PointerSet([rootRightLeft_E, rootRightRight_E, None]))
 
         root_E = Node(KeySet([66, 77]), PointerSet([rootLeft_E, rootMiddle_E, rootRight_E]))
+
+        expected_output = Index(root_E)
+
+        self.assertEqual(expected_output, ImplementMe.InsertIntoIndex(btree, key))
+
+# poomon007: split to forth level
+class TestCaseX(unittest.TestCase):
+    @timeout_decorator.timeout(15)
+    def test_lookup(self):
+        # 66, 75, 80, 100, 50, 77, 78, 10, 67, 70
+        rootLeftLeft = Node(KeySet([10, None]), PointerSet([None] * Index.FAN_OUT))
+        rootLeftRight = Node(KeySet([50, None]), PointerSet([None] * Index.FAN_OUT))
+
+        rootMiddleLeft = Node(KeySet([66, None]), PointerSet([None] * Index.FAN_OUT))
+        rootMiddleMiddle = Node(KeySet([67, 70]), PointerSet([None] * Index.FAN_OUT))
+        rootMiddleRight = Node(KeySet([75, None]), PointerSet([None] * Index.FAN_OUT))
+
+        rootRightLeft = Node(KeySet([77, 78]), PointerSet([None] * Index.FAN_OUT))
+        rootRightRight = Node(KeySet([80, 100]), PointerSet([None] * Index.FAN_OUT))
+
+        rootLeftLeft.pointers.pointers[Index.NUM_KEYS] = rootLeftRight
+        rootLeftRight.pointers.pointers[Index.NUM_KEYS] = rootMiddleLeft
+        rootMiddleLeft.pointers.pointers[Index.NUM_KEYS] = rootMiddleMiddle
+        rootMiddleMiddle.pointers.pointers[Index.NUM_KEYS] = rootMiddleRight
+        rootMiddleRight.pointers.pointers[Index.NUM_KEYS] = rootRightLeft
+        rootRightLeft.pointers.pointers[Index.NUM_KEYS] = rootRightRight
+
+        rootLeft = Node(KeySet([50, None]), PointerSet([rootLeftLeft, rootLeftRight, None]))
+        rootMiddle = Node(KeySet([67, 75]), PointerSet([rootMiddleLeft, rootMiddleMiddle, rootMiddleRight]))
+        rootRight = Node(KeySet([80, None]), PointerSet([rootRightLeft, rootRightRight, None]))
+
+        root = Node(KeySet([66, 77]), PointerSet([rootLeft, rootMiddle, rootRight]))
+
+        btree = Index(root)
+
+        key = 69
+
+        rootLeftLeftLeft_E = Node(KeySet([10, None]), PointerSet([None] * Index.FAN_OUT))
+        rootLeftLeftRight_E = Node(KeySet([50, None]), PointerSet([None] * Index.FAN_OUT))
+
+        rootLeftRightLeft_E = Node(KeySet([66, None]), PointerSet([None] * Index.FAN_OUT))
+        rootLeftRightRight_E = Node(KeySet([67, None]), PointerSet([None] * Index.FAN_OUT))
+
+        rootRightLeftLeft_E = Node(KeySet([69, 70]), PointerSet([None] * Index.FAN_OUT))
+        rootRightLeftRight_E = Node(KeySet([75, None]), PointerSet([None] * Index.FAN_OUT))
+
+        rootRightRightLeft_E = Node(KeySet([77, 78]), PointerSet([None] * Index.FAN_OUT))
+        rootRightRightRight_E = Node(KeySet([80, 100]), PointerSet([None] * Index.FAN_OUT))
+
+        rootLeftLeftLeft_E.pointers.pointers[Index.NUM_KEYS] = rootLeftLeftRight_E
+        rootLeftLeftRight_E.pointers.pointers[Index.NUM_KEYS] = rootLeftRightLeft_E
+        rootLeftRightLeft_E.pointers.pointers[Index.NUM_KEYS] = rootLeftRightRight_E
+        rootLeftRightRight_E.pointers.pointers[Index.NUM_KEYS] = rootRightLeftLeft_E
+        rootRightLeftLeft_E.pointers.pointers[Index.NUM_KEYS] = rootRightLeftRight_E
+        rootRightLeftRight_E.pointers.pointers[Index.NUM_KEYS] = rootRightRightLeft_E
+        rootRightRightLeft_E.pointers.pointers[Index.NUM_KEYS] = rootRightRightRight_E
+
+        rootLeftLeft_E = Node(KeySet([50, None]), PointerSet([rootLeftLeftLeft_E, rootLeftLeftRight_E, None]))
+        rootLeftRight_E = Node(KeySet([67, None]), PointerSet([rootLeftRightLeft_E, rootLeftRightRight_E, None]))
+
+        rootRightLeft_E = Node(KeySet([75, None]), PointerSet([rootRightLeftLeft_E, rootRightLeftRight_E, None]))
+        rootRightRight_E = Node(KeySet([80, None]), PointerSet([rootRightRightLeft_E, rootRightRightRight_E, None]))
+
+        rootLeft_E = Node(KeySet([50, None]), PointerSet([rootLeftLeft_E, rootLeftRight_E, None]))
+        rootRight_E = Node(KeySet([80, None]), PointerSet([rootRightLeft_E, rootRightRight_E, None]))
+
+        root_E = Node(KeySet([69, None]), PointerSet([rootLeft_E, rootRight_E, None]))
 
         expected_output = Index(root_E)
 
