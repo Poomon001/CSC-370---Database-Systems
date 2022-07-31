@@ -91,6 +91,7 @@ class ImplementMe:
             ''' insertion at a leaf '''
             # space is available to insert
             path.pop()
+
             if None in currKey.keys:
                  currKey.keys = [min(key, currKey.keys[0]), max(key, currKey.keys[0])]
                  return index
@@ -106,27 +107,37 @@ class ImplementMe:
                 # add to the next level
                 while splitKey:
                     key = splitKey.pop()
+
                     if path:
                         # still parent left
                         parent = path.pop()
                     else:
                         # no parent left
                         parent = Node(KeySet([key, None]), PointerSet([currNode, rightNode, None]))
-                        currNode.pointers.pointers[Index.NUM_KEYS] = rightNode
+                        if currNode.pointers.pointers[0] is None:
+                            currNode.pointers.pointers[Index.NUM_KEYS] = rightNode
                         break
 
                     # find a location in leaf and insert right node
                     if currNode.pointers.pointers[0] is None:
-                        if parent.pointers.pointers[0] == currNode:
-                            if parent.pointers.pointers[1] is None:
-                                parent.pointers.pointers[1] = rightNode
-                            else:
-                                parent.pointers.pointers[2] = parent.pointers.pointers[1]
-                                parent.pointers.pointers[1] = rightNode
-                                rightNode.pointers.pointers[Index.NUM_KEYS] = parent.pointers.pointers[2]
+                        for i in range(len(parent.pointers.pointers)):
+                            if parent.pointers.pointers[i] == currNode:
+                                if i + 1 < len(parent.pointers.pointers) and parent.pointers.pointers[i+1] is not None:
+                                    rightNode.pointers.pointers[Index.NUM_KEYS] = parent.pointers.pointers[i+1]
+                                parent.pointers.pointers.insert(i+1, rightNode)
+                                break
+                        rightNode = []
+                        if len(parent.pointers.pointers) == 4 and parent.pointers.pointers[3] is None:
+                            parent.pointers.pointers.pop()
 
-                        if parent.pointers.pointers[1] == currNode:
-                            parent.pointers.pointers[2] = rightNode
+                    # insert right parent if it exist
+                    if rightNode:
+                        for i in range(len(parent.pointers.pointers)):
+                            if parent.pointers.pointers[i] == currNode:
+                                parent.pointers.pointers.insert(i + 1, rightNode)
+                                break
+                        if len(parent.pointers.pointers) == 4 and parent.pointers.pointers[3] is None:
+                            parent.pointers.pointers.pop()
 
                     # add split key to parent
                     if None in parent.keys.keys:
@@ -135,7 +146,10 @@ class ImplementMe:
                     else:
                         # no space, split to the next level
                         nums = sorted([parent.keys.keys[0], parent.keys.keys[1], key])
-                        parent.keys = KeySet([nums[0], nums[2]])
+                        rightNode = Node(KeySet([nums[2], None]), PointerSet([parent.pointers.pointers[2], parent.pointers.pointers[3], None]))
+                        parent.keys = KeySet([nums[0], None])
+                        parent.pointers = PointerSet([parent.pointers.pointers[0], parent.pointers.pointers[1], None])
+                        currNode = parent
                         splitKey.append(nums[1])
 
                 if path:
