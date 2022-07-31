@@ -141,6 +141,7 @@ class ImplementMe:
                             if parent.pointers.pointers[i] == currNode:
                                 parent.pointers.pointers.insert(i + 1, rightNode)
                                 break
+                        rightNode = []
                         if len(parent.pointers.pointers) == 4 and parent.pointers.pointers[3] is None:
                             parent.pointers.pointers.pop()
 
