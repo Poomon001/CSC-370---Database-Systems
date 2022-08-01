@@ -14,18 +14,6 @@ class ImplementMe:
     # number of keys that already exist in the index.
     @staticmethod
     def InsertIntoIndex( index, key ):
-        keySets = index.root.keys
-        pointerSets = index.root.pointers
-        print(index.root)
-        print("\n ======= \n")
-
-        print(keySets)
-        print(pointerSets)
-
-        # create new node from keys and pointers
-        newNode = Node(keySets, pointerSets)
-        print(newNode)
-
         currNode = index.root
         currKey = currNode.keys
         path = []
@@ -58,7 +46,6 @@ class ImplementMe:
                     # currNode is not a leaf, go left-side pointer
                     currNode = currNode.pointers.pointers[0]
                     currKey = currNode.keys
-                    currPointer = currNode.pointers  # None represent the none Node
                     continue
 
             # set currKey to the right-most key
@@ -75,7 +62,6 @@ class ImplementMe:
                     # currNode is not a leaf, go middle pointer
                     currNode = currNode.pointers.pointers[1]
                     currKey = currNode.keys
-                    currPointer = currNode.pointers  # None represent the none Node
                     continue
 
             # case 3: key is greater than right-most key
@@ -85,7 +71,6 @@ class ImplementMe:
                     # currNode is not a leaf, go right pointer
                     currNode = currNode.pointers.pointers[2]
                     currKey = currNode.keys
-                    currPointer = currNode.pointers  # None represent the none Node
                     continue
 
             ''' insertion at a leaf '''
@@ -253,7 +238,6 @@ class ImplementMe:
                     # currNode is not a leaf, go left-side pointer
                     currNode = currNode.pointers.pointers[0]
                     currKey = currNode.keys
-                    currPointer = currNode.pointers  # None represent the none Node
                     continue
 
             # set currKey to the right-most key
@@ -266,7 +250,6 @@ class ImplementMe:
                     # currNode is not a leaf, go middle pointer
                     currNode = currNode.pointers.pointers[1]
                     currKey = currNode.keys
-                    currPointer = currNode.pointers  # None represent the none Node
                     continue
 
             # case 3: key is greater than right-most key
@@ -276,7 +259,6 @@ class ImplementMe:
                     # currNode is not a leaf, go right pointer
                     currNode = currNode.pointers.pointers[2]
                     currKey = currNode.keys
-                    currPointer = currNode.pointers  # None represent the none Node
                     continue
 
         ''' get a range '''
