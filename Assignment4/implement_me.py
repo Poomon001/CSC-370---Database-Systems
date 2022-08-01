@@ -41,9 +41,6 @@ class ImplementMe:
         while currKey != KeySet([None, None]):
             # save current path
             path.append(currNode)
-            ''' ADDED '''
-            # path.append(currNode)
-            ''' ADDED '''
 
             # set currKey to the left-most key
             currKeyVal = currKey.keys[0] # int | None
@@ -93,10 +90,9 @@ class ImplementMe:
 
             ''' insertion at a leaf '''
             # space is available to insert
-            path.pop()
-            ''' ADDED '''
-            # path.pop()
-            ''' ADDED '''
+            if path:
+                path.pop()
+
             if None in currKey.keys:
                  currKey.keys = [min(key, currKey.keys[0]), max(key, currKey.keys[0])]
                  return index
@@ -236,4 +232,61 @@ class ImplementMe:
     # of the tree and the number of leaves overlapping the interval.
     @staticmethod
     def RangeSearchInIndex( index, lower_bound, upper_bound ):
-        return []
+        answer = []
+        key = lower_bound
+        currNode = index.root
+        currKey = currNode.keys
+
+        if currKey == KeySet([None, None]):
+            return answer
+
+        while currNode.pointers.pointers[0] is not None:
+            # set currKey to the left-most key
+            currKeyVal = currKey.keys[0]  # int | None
+
+            ''' Traverse to a leaf node '''
+
+            # case 1: key is less than left-most key
+            if key < currKeyVal:
+                # None represent the none Node
+                if currNode.pointers.pointers[0] is not None:
+                    # currNode is not a leaf, go left-side pointer
+                    currNode = currNode.pointers.pointers[0]
+                    currKey = currNode.keys
+                    currPointer = currNode.pointers  # None represent the none Node
+                    continue
+
+            # set currKey to the right-most key
+            currKeyVal = currKey.keys[1]  # int | None
+
+            # case 2: key is between left-most and right-most keys
+            if currKeyVal is None or key < currKeyVal:
+                # None represent the none Node
+                if currNode.pointers.pointers[0] is not None:
+                    # currNode is not a leaf, go middle pointer
+                    currNode = currNode.pointers.pointers[1]
+                    currKey = currNode.keys
+                    currPointer = currNode.pointers  # None represent the none Node
+                    continue
+
+            # case 3: key is greater than right-most key
+            if currKeyVal and key > currKeyVal:
+                # None represent the none Node
+                if currNode.pointers.pointers[0] is not None:
+                    # currNode is not a leaf, go right pointer
+                    currNode = currNode.pointers.pointers[2]
+                    currKey = currNode.keys
+                    currPointer = currNode.pointers  # None represent the none Node
+                    continue
+
+        ''' get a range '''
+        while currNode:
+            # check if the keysets in the range
+            if lower_bound <= currNode.keys.keys[0] < upper_bound:
+                answer.append(currNode.keys.keys[0])
+
+            if currNode.keys.keys[1] and lower_bound <= currNode.keys.keys[1] < upper_bound:
+                answer.append(currNode.keys.keys[1])
+            currNode = currNode.pointers.pointers[2]
+
+        return answer
