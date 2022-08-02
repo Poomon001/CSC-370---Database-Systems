@@ -1127,5 +1127,39 @@ class TestCaseCI(unittest.TestCase):
 
         self.assertEqual( expected_output, ImplementMe.InsertIntoIndex( btree, key ) )
 
+# Range query with matching upper and lower bound
+class TestCaseCII(unittest.TestCase):
+    @timeout_decorator.timeout(15)
+    def test_range(self):
+        # 1, 5, 10, 15, 20, 25, 30, 35, 7, 0, 12, 17, 3, 6
+        leaf8 = Node(KeySet([30, 35]), PointerSet([None] * 3))
+        leaf7 = Node(KeySet([25, None]), PointerSet([None, None, leaf8]))
+        leaf6 = Node(KeySet([20, None]), PointerSet([None, None, leaf7]))
+        leaf5 = Node(KeySet([15, 17]), PointerSet([None, None, leaf6]))
+        leaf4 = Node(KeySet([10, 12]), PointerSet([None, None, leaf5]))
+        leaf3 = Node(KeySet([6, 7]), PointerSet([None, None, leaf4]))
+        leaf2 = Node(KeySet([5, None]), PointerSet([None, None, leaf3]))
+        leaf1 = Node(KeySet([1, 3]), PointerSet([None, None, leaf2]))
+        leaf0 = Node(KeySet([0, None]), PointerSet([None, None, leaf1]))
+
+        mid8 = Node(KeySet([25, 30]), PointerSet([leaf6, leaf7, leaf8]))
+        mid6 = Node(KeySet([15, None]), PointerSet([leaf4, leaf5, None]))
+        mid4 = Node(KeySet([6, None]), PointerSet([leaf2, leaf3, None]))
+        mid2 = Node(KeySet([1, None]), PointerSet([leaf0, leaf1, None]))
+
+        upper7 = Node(KeySet([20, None]), PointerSet([mid6, mid8, None]))
+        upper3 = Node(KeySet([5, None]), PointerSet([mid2, mid4, None]))
+
+        root = Node(KeySet([10, None]), PointerSet([upper3, upper7, None]))
+
+        btree = Index(root)
+
+        lower_bound = 15
+        upper_bound = 16
+
+        expected_output = [15]
+
+        self.assertEqual( expected_output, ImplementMe.RangeSearchInIndex( btree, lower_bound, upper_bound ) )
+
 # Run all unit tests above.
 unittest.main(argv=[''],verbosity=2, exit=False)
