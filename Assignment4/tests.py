@@ -458,8 +458,7 @@ class TestCase06(unittest.TestCase):
 
         self.assertEqual( expected_output, ImplementMe.InsertIntoIndex( btree, key ) )
 
-
-# Insertion causes splits that propagates at least three times
+# Insertion causes splits that propagates at least three times: : split at the right-most leaf
 class TestCase07(unittest.TestCase):
     @timeout_decorator.timeout(25)
     def test_insertion(self):
@@ -498,6 +497,100 @@ class TestCase07(unittest.TestCase):
         upper3 = Node(KeySet([3, None]), PointerSet([mid2, mid4, None]))
 
         root = Node(KeySet([5, None]), PointerSet([upper3, upper7, None]))
+
+        expected_output = Index(root)
+
+        self.assertEqual(expected_output, ImplementMe.InsertIntoIndex(btree, key))
+
+# Insertion causes splits that propagates at least three times: split at the left-most leaf
+class TestCaseXIV(unittest.TestCase):
+    @timeout_decorator.timeout(25)
+    def test_insertion(self):
+        # 1, 5, 10, 15, 20, 25,30,35, 7, 12, 17, 3, 4, 0
+        leaf7 = Node(KeySet([30, 35]), PointerSet([None] * 3))
+        leaf6 = Node(KeySet([25, None]), PointerSet([None, None, leaf7]))
+        leaf5 = Node(KeySet([20, None]), PointerSet([None, None, leaf6]))
+        leaf4 = Node(KeySet([15, 17]), PointerSet([None, None, leaf5]))
+        leaf3 = Node(KeySet([10, 12]), PointerSet([None, None, leaf4]))
+        leaf2 = Node(KeySet([5, 7]), PointerSet([None, None, leaf3]))
+        leaf1 = Node(KeySet([3, 4]), PointerSet([None, None, leaf2]))
+        leaf0 = Node(KeySet([0, 1]), PointerSet([None, None, leaf1]))
+
+        mid3 = Node(KeySet([25, 30]), PointerSet([leaf5, leaf6, leaf7]))
+        mid2 = Node(KeySet([15, None]), PointerSet([leaf3, leaf4, None]))
+        mid1 = Node(KeySet([3, 5]), PointerSet([leaf0, leaf1, leaf2]))
+
+        root = Node(KeySet([10, 20]), PointerSet([mid1, mid2, mid3]))
+        btree = Index(root)
+
+        key = 2
+
+        leaf8 = Node(KeySet([30, 35]), PointerSet([None] * 3))
+        leaf7 = Node(KeySet([25, None]), PointerSet([None, None, leaf8]))
+        leaf6 = Node(KeySet([20, None]), PointerSet([None, None, leaf7]))
+        leaf5 = Node(KeySet([15, 17]), PointerSet([None, None, leaf6]))
+        leaf4 = Node(KeySet([10, 12]), PointerSet([None, None, leaf5]))
+        leaf3 = Node(KeySet([5, 7]), PointerSet([None, None, leaf4]))
+        leaf2 = Node(KeySet([3, 4]), PointerSet([None, None, leaf3]))
+        leaf1 = Node(KeySet([1, 2]), PointerSet([None, None, leaf2]))
+        leaf0 = Node(KeySet([0, None]), PointerSet([None, None, leaf1]))
+
+        mid8 = Node(KeySet([25, 30]), PointerSet([leaf6, leaf7, leaf8]))
+        mid6 = Node(KeySet([15, None]), PointerSet([leaf4, leaf5, None]))
+        mid4 = Node(KeySet([5, None]), PointerSet([leaf2, leaf3, None]))
+        mid2 = Node(KeySet([1, None]), PointerSet([leaf0, leaf1, None]))
+
+        upper7 = Node(KeySet([20, None]), PointerSet([mid6, mid8, None]))
+        upper3 = Node(KeySet([3, None]), PointerSet([mid2, mid4, None]))
+
+        root = Node(KeySet([10, None]), PointerSet([upper3, upper7, None]))
+
+        expected_output = Index(root)
+
+        self.assertEqual(expected_output, ImplementMe.InsertIntoIndex(btree, key))
+
+# Insertion causes splits that propagates at least three times: split at the right right leaf connecting with another parent leaf
+class TestCaseXV(unittest.TestCase):
+    @timeout_decorator.timeout(25)
+    def test_insertion(self):
+        # 1, 5, 10, 15, 20, 25,30,35, 7, 0, 12, 17, 3
+        leaf7 = Node(KeySet([30, 35]), PointerSet([None] * 3))
+        leaf6 = Node(KeySet([25, None]), PointerSet([None, None, leaf7]))
+        leaf5 = Node(KeySet([20, None]), PointerSet([None, None, leaf6]))
+        leaf4 = Node(KeySet([15, 17]), PointerSet([None, None, leaf5]))
+        leaf3 = Node(KeySet([10, 12]), PointerSet([None, None, leaf4]))
+        leaf2 = Node(KeySet([5, 7]), PointerSet([None, None, leaf3]))
+        leaf1 = Node(KeySet([1, 3]), PointerSet([None, None, leaf2]))
+        leaf0 = Node(KeySet([0, None]), PointerSet([None, None, leaf1]))
+
+        mid3 = Node(KeySet([25, 30]), PointerSet([leaf5, leaf6, leaf7]))
+        mid2 = Node(KeySet([15, None]), PointerSet([leaf3, leaf4, None]))
+        mid1 = Node(KeySet([1, 5]), PointerSet([leaf0, leaf1, leaf2]))
+
+        root = Node(KeySet([10, 20]), PointerSet([mid1, mid2, mid3]))
+        btree = Index(root)
+
+        key = 6
+
+        leaf8 = Node(KeySet([30, 35]), PointerSet([None] * 3))
+        leaf7 = Node(KeySet([25, None]), PointerSet([None, None, leaf8]))
+        leaf6 = Node(KeySet([20, None]), PointerSet([None, None, leaf7]))
+        leaf5 = Node(KeySet([15, 17]), PointerSet([None, None, leaf6]))
+        leaf4 = Node(KeySet([10, 12]), PointerSet([None, None, leaf5]))
+        leaf3 = Node(KeySet([6, 7]), PointerSet([None, None, leaf4]))
+        leaf2 = Node(KeySet([5, None]), PointerSet([None, None, leaf3]))
+        leaf1 = Node(KeySet([1, 3]), PointerSet([None, None, leaf2]))
+        leaf0 = Node(KeySet([0, None]), PointerSet([None, None, leaf1]))
+
+        mid8 = Node(KeySet([25, 30]), PointerSet([leaf6, leaf7, leaf8]))
+        mid6 = Node(KeySet([15, None]), PointerSet([leaf4, leaf5, None]))
+        mid4 = Node(KeySet([6, None]), PointerSet([leaf2, leaf3, None]))
+        mid2 = Node(KeySet([1, None]), PointerSet([leaf0, leaf1, None]))
+
+        upper7 = Node(KeySet([20, None]), PointerSet([mid6, mid8, None]))
+        upper3 = Node(KeySet([5, None]), PointerSet([mid2, mid4, None]))
+
+        root = Node(KeySet([10, None]), PointerSet([upper3, upper7, None]))
 
         expected_output = Index(root)
 
@@ -573,6 +666,37 @@ class TestCase10(unittest.TestCase):
         expected_output = False
 
         self.assertEqual( expected_output, ImplementMe.LookupKeyInIndex( btree, key ) )
+
+class TestCaseXVI(unittest.TestCase):
+    @timeout_decorator.timeout(25)
+    def test_insertion(self):
+        # 1, 5, 10, 15, 20, 25, 30, 35, 7, 0, 12, 17, 3, 6
+        leaf8 = Node(KeySet([30, 35]), PointerSet([None] * 3))
+        leaf7 = Node(KeySet([25, None]), PointerSet([None, None, leaf8]))
+        leaf6 = Node(KeySet([20, None]), PointerSet([None, None, leaf7]))
+        leaf5 = Node(KeySet([15, 17]), PointerSet([None, None, leaf6]))
+        leaf4 = Node(KeySet([10, 12]), PointerSet([None, None, leaf5]))
+        leaf3 = Node(KeySet([6, 7]), PointerSet([None, None, leaf4]))
+        leaf2 = Node(KeySet([5, None]), PointerSet([None, None, leaf3]))
+        leaf1 = Node(KeySet([1, 3]), PointerSet([None, None, leaf2]))
+        leaf0 = Node(KeySet([0, None]), PointerSet([None, None, leaf1]))
+
+        mid8 = Node(KeySet([25, 30]), PointerSet([leaf6, leaf7, leaf8]))
+        mid6 = Node(KeySet([15, None]), PointerSet([leaf4, leaf5, None]))
+        mid4 = Node(KeySet([6, None]), PointerSet([leaf2, leaf3, None]))
+        mid2 = Node(KeySet([1, None]), PointerSet([leaf0, leaf1, None]))
+
+        upper7 = Node(KeySet([20, None]), PointerSet([mid6, mid8, None]))
+        upper3 = Node(KeySet([5, None]), PointerSet([mid2, mid4, None]))
+
+        root = Node(KeySet([10, None]), PointerSet([upper3, upper7, None]))
+
+        btree = Index(root)
+        # found but return False
+        key = 36
+        expected_output = False
+
+        self.assertEqual(expected_output, ImplementMe.LookupKeyInIndex(btree, key))
 
 
 # Lookup key within tree's range but not in tree
@@ -671,22 +795,71 @@ class TestCaseXI(unittest.TestCase):
 class TestCase13(unittest.TestCase):
     @timeout_decorator.timeout(15)
     def test_range(self):
-        # 87, 99, 68, 41
-        leaf1 = Node( \
-            KeySet([87, 99]), \
-            PointerSet([None] * Index.FAN_OUT))
-        leaf0 = Node( \
-            KeySet([41, 68]), \
+
+        leaf1 = Node(\
+            KeySet([87, 99]),\
+            PointerSet([None]*Index.FAN_OUT))
+        leaf0 = Node(\
+            KeySet([41, 68]),\
             PointerSet([None, None, leaf1]))
-        root = Node( \
-            KeySet([87, None]), \
+        root = Node(\
+            KeySet([87, None]),\
             PointerSet([leaf0, leaf1, None]))
+        btree = Index( root )
+
+        lower_bound = 68
+        upper_bound = 88
+
+        expected_output = [68, 87]
+
+        self.assertEqual( expected_output, ImplementMe.RangeSearchInIndex( btree, lower_bound, upper_bound ) )
+
+# Range query fully contained in one leaf node
+class TestCaseXI(unittest.TestCase):
+    @timeout_decorator.timeout(15)
+    def test_range(self):
+        leaf1 = Node(\
+            KeySet([68, 87]),\
+            PointerSet([None]*Index.FAN_OUT))
+        leaf0 = Node(\
+            KeySet([41, None]),\
+            PointerSet([None, None, leaf1]))
+        root = Node(\
+            KeySet([68, None]),\
+            PointerSet([leaf0, leaf1, None]))
+        btree = Index( root )
+
+        lower_bound = 87
+        upper_bound = 100
+
+        expected_output = [87]
+
+        self.assertEqual( expected_output, ImplementMe.RangeSearchInIndex( btree, lower_bound, upper_bound ) )
+
+class TestCaseXII(unittest.TestCase):
+    @timeout_decorator.timeout(25)
+    def test_insertion(self):
+        # 1, 5, 10, 15, 20, 25,30,35, 7, 0, 12, 17, 3
+        leaf7 = Node(KeySet([30, 35]), PointerSet([None] * 3))
+        leaf6 = Node(KeySet([25, None]), PointerSet([None, None, leaf7]))
+        leaf5 = Node(KeySet([20, None]), PointerSet([None, None, leaf6]))
+        leaf4 = Node(KeySet([15, 17]), PointerSet([None, None, leaf5]))
+        leaf3 = Node(KeySet([10, 12]), PointerSet([None, None, leaf4]))
+        leaf2 = Node(KeySet([5, 7]), PointerSet([None, None, leaf3]))
+        leaf1 = Node(KeySet([1, 3]), PointerSet([None, None, leaf2]))
+        leaf0 = Node(KeySet([0, None]), PointerSet([None, None, leaf1]))
+
+        mid3 = Node(KeySet([25, 30]), PointerSet([leaf5, leaf6, leaf7]))
+        mid2 = Node(KeySet([15, None]), PointerSet([leaf3, leaf4, None]))
+        mid1 = Node(KeySet([1, 5]), PointerSet([leaf0, leaf1, leaf2]))
+
+        root = Node(KeySet([10, 20]), PointerSet([mid1, mid2, mid3]))
         btree = Index(root)
 
-        lower_bound = 42
-        upper_bound = 66
+        lower_bound = -1
+        upper_bound = 8
 
-        expected_output = []
+        expected_output = [0,1,3,5,7]
 
         self.assertEqual(expected_output, ImplementMe.RangeSearchInIndex(btree, lower_bound, upper_bound))
 
