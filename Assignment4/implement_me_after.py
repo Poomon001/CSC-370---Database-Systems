@@ -155,58 +155,52 @@ class ImplementMe:
         currNode = index.root
         currKey = currNode.keys
 
-        while currKey != KeySet([None, None]):
+        if currKey == KeySet([None, None]):
+            return False
+
+        while currNode.pointers.pointers[0] is not None:
             # set currKey to the left-most key
-            currKeyVal = currKey.keys[0]
+            currKeyVal = currKey.keys[0]  # int | None
 
-            if key == currKeyVal:
-                return True
+            ''' Traverse to a leaf node '''
 
-            # go left-side pointer
+            # case 1: key is less than left-most key
             if key < currKeyVal:
                 # None represent the none Node
-                if currNode.pointers.pointers[0] and currNode.pointers.pointers[0] is not None:
-                    leftPointer = currNode.pointers.pointers[0]
-                else:
-                    return False
-
-                currKey = leftPointer.keys
-                currPointer = leftPointer.pointers # None represent the none Node
-                currNode = Node(currKey, currPointer)
-                continue
-
+                if currNode.pointers.pointers[0] is not None:
+                    # currNode is not a leaf, go left-side pointer
+                    currNode = currNode.pointers.pointers[0]
+                    currKey = currNode.keys
+                    continue
 
             # set currKey to the right-most key
-            currKeyVal = currKey.keys[1]
+            currKeyVal = currKey.keys[1]  # int | None
 
-            if key == currKeyVal:
-                return True
-
-            # go middle pointer
+            # case 2: key is between left-most and right-most keys
             if currKeyVal is None or key < currKeyVal:
                 # None represent the none Node
-                if currNode.pointers.pointers[1] and currNode.pointers.pointers[1] is not None:
-                    middlePointer = currNode.pointers.pointers[1]
-                else:
-                    return False
+                if currNode.pointers.pointers[0] is not None:
+                    # currNode is not a leaf, go middle pointer
+                    currNode = currNode.pointers.pointers[1]
+                    currKey = currNode.keys
+                    continue
 
-                currKey = middlePointer.keys
-                currPointer = middlePointer.pointers # None represent the none Node
-                currNode = Node(currKey, currPointer)
-                continue
-
-            # go right-side pointer
-            if key > currKeyVal:
+            # case 3: key is greater than right-most key
+            if currKeyVal and key >= currKeyVal:
                 # None represent the none Node
-                if currNode.pointers.pointers[2] and currNode.pointers.pointers[2] is not None:
-                    rightPointer = currNode.pointers.pointers[2]
-                else:
-                    return False
+                if currNode.pointers.pointers[0] is not None:
+                    # currNode is not a leaf, go right pointer
+                    currNode = currNode.pointers.pointers[2]
+                    currKey = currNode.keys
+                    continue
 
-                currKey = rightPointer.keys
-                currPointer = rightPointer.pointers  # None represent the none Node
-                currNode = Node(currKey, currPointer)
-                continue
+        ''' check if the leaf nodes contains the key '''
+        # check if the keysets contains the key
+        if currNode.keys.keys[0] == key:
+            return True
+
+        if currNode.keys.keys[1] and currNode.keys.keys[1] == key:
+            return True
 
         return False
 
