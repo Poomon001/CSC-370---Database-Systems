@@ -264,11 +264,12 @@ class ImplementMe:
             if currNode.keys.keys[0] >= upper_bound:
                 break
 
-            if currNode.keys.keys[1] and lower_bound <= currNode.keys.keys[1] < upper_bound:
-                answer.append(currNode.keys.keys[1])
+            if currNode.keys.keys[1]:
+                if lower_bound <= currNode.keys.keys[1] < upper_bound:
+                    answer.append(currNode.keys.keys[1])
 
-            if currNode.keys.keys[1] and currNode.keys.keys[1] >= upper_bound:
-                break
+                if currNode.keys.keys[1] >= upper_bound:
+                    break
 
             currNode = currNode.pointers.pointers[2]
 
