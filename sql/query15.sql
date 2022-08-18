@@ -5,7 +5,6 @@
 -- 0.9 marks: <13 operators
 -- 0.8 marks: correct answer
 
-
 SELECT count(*)/(count(*)+max(K)) AS Fraction
 FROM genderbreakdown AS A
 	JOIN genderbreakdown AS B

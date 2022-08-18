@@ -7,7 +7,6 @@
 -- 0.9 marks: <35 operators
 -- 0.8 marks: correct answer
 
-
 SELECT DISTINCT abbr, industry.name, sum(payroll) AS 'Total Payrolls', (sum(employees)/x.total_population)*100 AS '% of Population'
 FROM county
 	JOIN state

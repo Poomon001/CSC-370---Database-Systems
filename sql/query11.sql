@@ -7,7 +7,6 @@
 -- 0.9 marks: <11 operators
 -- 0.8 marks: correct answer
 
-
 SELECT abbr
 FROM county
 	JOIN state

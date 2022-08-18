@@ -70,6 +70,7 @@ def convert_to_db(tableSet, relationshipSet):
                 tableSet[name][2] = tempProperties[2] | set([(tuple(parent_primary_key), parent, tuple(parent_primary_key))])
 
         if supporting_relations:
+            # supporting relations
             for supporting_relation_name in supporting_relations:
                 supporting_relation = relationshipSet[supporting_relation_name]
                 tempProperties[0] = tempProperties[0] | set(supporting_relation[3])
@@ -199,16 +200,7 @@ def convert_to_table( erd ):
             [relationshipSet[name][3].append(pk) for pk in primary_keys]
             [relationshipSet[name][5].append(pk) for pk in primary_keys]
 
-    print("\n===== table Set =====\n")
-    print(tableSet)
-    print("\n==================\n")
-
-    print("\n===== relationship Set =====\n")
-    print(relationshipSet)
-    print("\n==================\n")
-
     # make db
     db = convert_to_db(tableSet, relationshipSet)
 
-    print("mine", "\n".join([str(val) for val in db.tables]))
     return db
